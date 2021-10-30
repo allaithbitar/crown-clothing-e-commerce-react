@@ -1,4 +1,4 @@
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { initializeApp } from "@firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 
@@ -15,7 +15,31 @@ const app = initializeApp(config);
 const provider = new GoogleAuthProvider();
 export const auth = getAuth(app);
 
-const firebaseFirestore = getFirestore(app);
+const firestore = getFirestore(app);
 provider.setCustomParameters({ prompt: "select_account" });
 
 export const signInWithGoogle = () => signInWithPopup(auth, provider);
+
+export const createUserProfileDocument = async (
+  userAuthObj,
+  additionalData
+) => {
+  if (!userAuthObj) return;
+  const userRef = doc(firestore, "users", userAuthObj.uid);
+  const snapShotExsist = await (await getDoc(userRef)).exists();
+  if (!snapShotExsist) {
+    const { displayName, email } = userAuthObj;
+    const createdAt = new Date();
+    try {
+      await setDoc(userRef, {
+        displayName,
+        email,
+        createdAt,
+        ...additionalData,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  return userRef;
+};
