@@ -4,8 +4,10 @@ import { Link } from "react-router-dom";
 import { ReactComponent as Logo } from "./../../assets/crown.svg";
 import { auth } from "../../firebase/firebase.utils";
 import { connect } from "react-redux";
+import CartIcon from "../cart-icon/cart-icon.component";
+import CartDropDown from "../cart-dropdown/cart-dropdown.component";
 
-const Header = ({ currentUser }) => {
+const Header = ({ currentUser, showCart }) => {
   return (
     <div className="header">
       <Link to="/" className="logo-contianer">
@@ -23,15 +25,16 @@ const Header = ({ currentUser }) => {
           <div className="option" onClick={() => auth.signOut()}>
             SIGN OUT
           </div>
-        ) : (
-          <Link></Link>
-        )}
+        ) : null}
+        <CartIcon />
       </div>
+      {showCart ? <CartDropDown /> : null}
     </div>
   );
 };
 
 const mapStateToProps = (state) => ({
+  showCart: state.cart.hidden,
   currentUser: state.user.currentUser,
 });
 
