@@ -1,15 +1,39 @@
 import React from "react";
+import { connect } from "react-redux";
 import { Route } from "react-router";
-import CollectionOverView from "../../components/collections-overview/collections-overview.component";
-import CollectionPage from "../collection/collection.component";
+import { fetchCollectionsStart } from "../../redux/shop/shop.actions";
 
-const ShopPage = ({ match }) => {
-  return (
-    <div className="shope-page">
-      <Route exact path={`${match.path}`} component={CollectionOverView} />
-      <Route path={`${match.path}/:collectionId`} component={CollectionPage} />
-    </div>
-  );
-};
+import CollectionOveriewContainer from "../../components/collections-overview/collection.overview.container";
+import CollectionPageContainer from "../collection/collection.container";
 
-export default ShopPage;
+class ShopPage extends React.Component {
+  unsubscribeFromSnapShot = null;
+
+  componentDidMount() {
+    const { fetchCollectionsStart } = this.props;
+    fetchCollectionsStart();
+  }
+
+  render() {
+    const { match } = this.props;
+    return (
+      <div className="shope-page">
+        <Route
+          exact
+          path={`${match.path}`}
+          component={CollectionOveriewContainer}
+        />
+        <Route
+          path={`${match.path}/:collectionId`}
+          component={CollectionPageContainer}
+        />
+      </div>
+    );
+  }
+}
+
+const mapDispatchToProps = (dispatch) => ({
+  fetchCollectionsStart: () => dispatch(fetchCollectionsStart()),
+});
+
+export default connect(null, mapDispatchToProps)(ShopPage);

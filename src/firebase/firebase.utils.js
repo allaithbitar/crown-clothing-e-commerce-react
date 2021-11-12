@@ -1,6 +1,11 @@
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { initializeApp } from "@firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  onAuthStateChanged,
+} from "firebase/auth";
 
 const config = {
   apiKey: "AIzaSyCW00G_3FlT_Tar_sF0I0Q6Gpto07VECJ8",
@@ -12,13 +17,16 @@ const config = {
 };
 
 const app = initializeApp(config);
-const provider = new GoogleAuthProvider();
+
+export const googleProvider = new GoogleAuthProvider();
+
 export const auth = getAuth(app);
 
-const firestore = getFirestore(app);
-provider.setCustomParameters({ prompt: "select_account" });
+export const firestore = getFirestore(app);
 
-export const signInWithGoogle = () => signInWithPopup(auth, provider);
+googleProvider.setCustomParameters({ prompt: "select_account" });
+
+export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 export const createUserProfileDocument = async (
   userAuthObj,
@@ -42,4 +50,34 @@ export const createUserProfileDocument = async (
     }
   }
   return userRef;
+};
+
+export const convertCollectionsSnapShotToMap = (collections) => {
+  const transformedCollection = collections.docs.map((doc) => {
+    const { title, items } = doc.data();
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title,
+      items,
+    };
+  });
+
+  return transformedCollection.reduce((accumulator, collection) => {
+    accumulator[collection.title.toLowerCase()] = collection;
+    return accumulator;
+  }, {});
+};
+
+export const getCurrentUser = () => {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(
+      auth,
+      (userAuth) => {
+        unsubscribe();
+        resolve(userAuth);
+      },
+      reject
+    );
+  });
 };
