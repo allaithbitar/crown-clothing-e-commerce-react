@@ -28,4 +28,8 @@
     margin-left: auto;
     font-size: 36px;
   }
+  @media (max-width: 800px) {
+    width: 85%;
+    justify-content: center;
+  }
 }
